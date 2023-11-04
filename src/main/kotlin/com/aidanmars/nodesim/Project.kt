@@ -1,107 +1,111 @@
 package com.aidanmars.nodesim
 
+import java.awt.Point
+import java.util.Random
+
 class Project(
-    var nodes: MutableMap<String, Node> = mutableMapOf(),
-    var wires: MutableMap<String, Wire> = mutableMapOf(),
-    val updates: MutableSet<String> = mutableSetOf(),
+    val nodes: MutableMap<Long, Node> = mutableMapOf(),
+    val wires: MutableMap<Long, Wire> = mutableMapOf(),
+    val updates: MutableSet<Node> = mutableSetOf(),
+    private val random: Random = Random(),
+    val chunks: MutableMap<Point, MutableList<Node>> = mutableMapOf()
 ) {
-    fun layWire(from: String, to: String): String {
-        val newId = getNewWireId()
-        val fromNode = nodes[from]!!
-        val toNode = nodes[to]!!
-        wires[newId] = Wire(
+    /**
+     * @return the new wire, or null if either the from or to node don't exist within this project
+     */
+    fun layWire(from: Node, to: Node, update: Boolean = true): Wire? {
+        if (!nodeExists(from) || !nodeExists(to)) return null
+        val newWire = Wire(
+            getNewWireId(),
             from,
-            to,
-            fromNode.firstWire,
-            ""
+            to
         )
-        fromNode.firstWire = newId
-        if (fromNode.output > 0) {
-            incrementNodePower(to, toNode)
+        from.outputWires.add(newWire)
+        to.inputWires.add(newWire)
+        wires[newWire.id] = newWire
+        if (update && from.output > 0) {
+            incrementNodePower(to)
         }
-        return newId
+        return newWire
     }
 
-    fun deleteWire(id: String) {
-        val wire = wires.remove(id)!!
-        if (wire.previous == "") {
-            nodes[wire.input]?.firstWire = wire.next
-        } else {
-            wires[wire.next]?.previous = wire.previous
-            wires[wire.previous]?.next = wire.next
-        }
-        if ((nodes[wire.input]?.output ?: 0) > 0) {
-            val outputNode = nodes[wire.output]
-            if (outputNode === null) return
-            decrementNodePower(wire.output, outputNode)
+    fun deleteWire(wire: Wire, update: Boolean = true) {
+        if (!wireExists(wire)) return
+        wire.input.outputWires.remove(wire)
+        wire.output.inputWires.remove(wire)
+        wires.remove(wire.id)
+        if (update && wire.input.output > 0 && wire.output.id in nodes) {
+            decrementNodePower(wire.output)
         }
     }
 
-    fun createNode(x: Int, y: Int, type: NodeType): Pair<String, Node> {
-        val id = getNewNodeId()
+    fun createNode(x: Int, y: Int, type: NodeType, update: Boolean = true): Node {
         val node = Node(
+            getNewNodeId(),
             type,
             x,
             y,
-            "",
+            mutableListOf(),
+            mutableListOf(),
             0,
-            type.update(0)
+            if (update) type.update(0) else 0
         )
-        nodes[id] = node
-        return id to node
+        nodes[node.id] = node
+        chunks.getOrPut(getChunk(x, y)) { mutableListOf() }.add(node)
+        return node
     }
 
-    fun deleteNode(id: String) {
-        val node = nodes[id]!!
-        while (node.firstWire.isNotBlank()) {
-            deleteWire(node.firstWire)
-        }
-        nodes.remove(id)
-        wires.keys.toList().forEach { wireId ->
-            val wire = wires[wireId]!!
-            if (wire.output == id) deleteWire(wireId)
-        }
+    fun deleteNode(node: Node, update: Boolean = true) {
+        if (!nodeExists(node)) return
+        val wireInputs = node.inputWires.toList()
+        val wireOutputs = node.outputWires.toList()
+
+        wireInputs.forEach { deleteWire(it, false) }
+        wireOutputs.forEach { deleteWire(it, update) }
+
+        nodes.remove(node.id)
     }
+
+    fun moveNode(node: Node, x: Int, y: Int) {
+        if (!nodeExists(node)) return
+        chunks[getChunk(node.x, node.y)]?.remove(node)
+        chunks.getOrPut(getChunk(x, y)) { mutableListOf() }.add(node)
+        node.x = x
+        node.y = y
+    }
+
+    private fun nodeExists(node: Node): Boolean = (node === nodes[node.id])
+    private fun wireExists(wire: Wire): Boolean = (wire === wires[wire.id])
 
     fun verifyWires() {
         wires.keys.toList().forEach { wireId ->
             val wire = wires[wireId]!!
-            if (wire.input !in nodes || wire.output !in nodes) deleteWire(wireId)
+            if (wire.input.id !in nodes || wire.output.id !in nodes) deleteWire(wire)
         }
     }
 
-    /**
-     * @return a list of ids corresponding to the wires that power the node
-     */
-    fun getNodePowerSources(id: String): List<String> {
-        return wires.keys.filter {
-            val wire = wires[it]!!
-            wire.output == id
-        }
-    }
-
-    fun incrementNodePower(id: String, node: Node = nodes[id]!!) {
+    fun incrementNodePower(node: Node) {
         node.inputPower++
-        if (node.inputPower == 1) updates.add(id)
+        if (node.inputPower == 1) updates.add(node)
     }
 
-    fun decrementNodePower(id: String, node: Node = nodes[id]!!) {
+    fun decrementNodePower(node: Node) {
         node.inputPower--
-        if (node.inputPower == 0) updates.add(id)
+        if (node.inputPower == 0) updates.add(node)
     }
 
-    fun getNewNodeId(): String {
-        var id = generateId('n')
+    fun getNewNodeId(): Long {
+        var id = random.nextLong()
         while (id in nodes) {
-            id = generateId('n')
+            id = random.nextLong()
         }
         return id
     }
 
-    fun getNewWireId(): String {
-        var id = generateId('w')
+    fun getNewWireId(): Long {
+        var id = random.nextLong()
         while (id in wires) {
-            id = generateId('w')
+            id = random.nextLong()
         }
         return id
     }
