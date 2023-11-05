@@ -1,8 +1,8 @@
 package com.aidanmars.nodesim
 
-enum class NodeType(val serialName: String, val update: (Int) -> Byte) {
-    inverter("inverter", { if (it > 0) 0 else 1 }),
-    switch("switch", { 0 }),
-    switchOn("switch-on", { 1 }),
-    light("light", { if (it > 0) 1 else 0 })
+enum class NodeType(val update: (Int) -> Boolean) {
+    inverter({ it == 0 }),
+    switch({ false }),
+    switchOn({ true }),
+    light({ it > 0 })
 }

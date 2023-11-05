@@ -2,11 +2,12 @@ package com.aidanmars.nodesim.game
 
 import com.aidanmars.nodesim.Constants
 import com.aidanmars.nodesim.Node
+import com.aidanmars.nodesim.NodeType
 import com.aidanmars.nodesim.getChunk
 import java.awt.*
 import java.awt.event.*
+import java.awt.geom.Ellipse2D
 import java.awt.geom.Line2D
-import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import javax.swing.JPanel
 import kotlin.math.abs
@@ -14,16 +15,11 @@ import kotlin.math.ceil
 import kotlin.math.pow
 
 object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, FocusListener {
-    private val connect: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_connect.svg"))
-        .getScaledInstance(2, 2, BufferedImage.SCALE_DEFAULT)
-    private val delete: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_delete.svg"))
-        .getScaledInstance(2, 2, BufferedImage.SCALE_DEFAULT)
-    private val interact: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_interact.svg"))
-        .getScaledInstance(2, 2, BufferedImage.SCALE_DEFAULT)
-    private val place: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_place.svg"))
-        .getScaledInstance(2, 2, BufferedImage.SCALE_DEFAULT)
-    private val close: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_close.svg"))
-        .getScaledInstance(2, 2, BufferedImage.SCALE_DEFAULT)
+    val connect: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_connect.svg"))
+    val delete: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_delete.svg"))
+    val interact: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_interact.svg"))
+    val place: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_place.svg"))
+    val close: Image = ImageIO.read(SimObjectDrawer.resourceInputStreamOf("images/button_close.svg"))
     val closeLocation = Point(0, 10)
     val placeLocation = Point(10, 0)
     val connectLocation = Point(70, 0)
@@ -32,7 +28,7 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
 
     init {
         preferredSize = Dimension(640, 480)
-        background = Color.GRAY
+        background = Color.LIGHT_GRAY
     }
     private fun readResolve(): Any = GameUI
     override fun keyTyped(e: KeyEvent) {
@@ -41,6 +37,24 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
             '2' -> GameData.currentTool = ToolType.connect
             '3' -> GameData.currentTool = ToolType.interact
             '4' -> GameData.currentTool = ToolType.delete
+            else -> checkPlaceTypeKey(e.keyChar)
+        }
+    }
+
+    private fun checkPlaceTypeKey(key: Char) {
+        when (key) {
+            'e' -> {
+                GameData.currentTool = ToolType.place
+                GameData.currentPlaceType = NodeType.inverter
+            }
+            'r' -> {
+                GameData.currentTool = ToolType.place
+                GameData.currentPlaceType = NodeType.light
+            }
+            't' -> {
+                GameData.currentTool = ToolType.place
+                GameData.currentPlaceType = NodeType.switch
+            }
         }
     }
 
@@ -67,11 +81,11 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
     }
 
     override fun mousePressed(e: MouseEvent) {
-        GameData.selectionPoint1 = GameData.getLocationInWorld(e.point)
+        GameData.selectionPoint1.location = GameData.getLocationInWorld(e.point)
     }
 
     override fun mouseReleased(e: MouseEvent) {
-        GameData.selectionPoint2 = GameData.getLocationInWorld(e.point)
+        GameData.selectionPoint2.location = GameData.getLocationInWorld(e.point)
     }
 
     override fun mouseEntered(e: MouseEvent) {}
@@ -85,8 +99,8 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
     override fun mouseMoved(e: MouseEvent) {}
 
     override fun mouseWheelMoved(e: MouseWheelEvent) {
-        val scaleScale = 1.1.pow(abs(e.preciseWheelRotation))
-        GameData.scale = if (e.preciseWheelRotation < 0) GameData.scale / scaleScale else GameData.scale * scaleScale
+        val scaleScale = 1.1.pow(abs(e.preciseWheelRotation)).toFloat()
+        GameData.scale = if (e.preciseWheelRotation > 0) GameData.scale / scaleScale else GameData.scale * scaleScale
     }
 
     override fun paintComponent(g: Graphics) {
@@ -105,6 +119,7 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
         drawHUD(graphics2D)
     }
 
+    private val chunkLineColor = Color(96, 96, 96)
     private fun drawBackGround(g2d: Graphics2D) {
         if (GameData.scale < 0.125) return
 
@@ -112,29 +127,45 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
         val numTilesX = ceil(size.getWidth() / tileSize).toInt() + 1
         val numTilesY = ceil(size.getHeight() / tileSize).toInt() + 1
 
-        val originX = (GameData.xLocation - (GameData.xLocation % Constants.TILE_SIZE))
-        val originY = (GameData.yLocation - (GameData.yLocation % Constants.TILE_SIZE))
+        val originX = -(GameData.xLocation % Constants.TILE_SIZE)
+        val originY = -(GameData.yLocation % Constants.TILE_SIZE)
+        var chunkX = GameData.xLocation / Constants.TILE_SIZE and 15
+        var chunkY = GameData.yLocation / Constants.TILE_SIZE and 15
 
         val scaledOriginX = originX * GameData.scale
         val scaledOriginY = originY * GameData.scale
+        val backGroundLineBaseColor = if (GameData.currentTool === ToolType.delete) Color.RED else Color.GRAY
 
-        g2d.color = Color.DARK_GRAY
-        g2d.stroke = BasicStroke((3.0F * GameData.scale).toFloat())
+        g2d.color = backGroundLineBaseColor
+        g2d.stroke = BasicStroke((3.0F * GameData.scale))
 
         var x = scaledOriginX
-        val yMax = size.getHeight()
+        val yMax = size.getHeight().toFloat()
         for (tileX in 0..numTilesX) {
-            g2d.draw(Line2D.Double(x, 0.0, x, yMax))
+            if (chunkX == 0) g2d.color = chunkLineColor
+            g2d.draw(Line2D.Float(x, 0.0F, x, yMax))
             x += tileSize
+            if (chunkX == 0) g2d.color = backGroundLineBaseColor
+            chunkX = (chunkX + 1) and 15
         }
         var y = scaledOriginY
-        val xMax = size.getWidth()
+        val xMax = size.getWidth().toFloat()
         for (tileY in 0..numTilesY) {
-            g2d.draw(Line2D.Double(0.0, y, xMax, y))
+            if (chunkY == 0) g2d.color = chunkLineColor
+            g2d.draw(Line2D.Float(0.0F, y, xMax, y))
             y += tileSize
+            if (chunkY == 0) g2d.color = backGroundLineBaseColor
+            chunkY = (chunkY + 1) and 15
         }
         g2d.color = Color.BLACK
-//        val zeroZeroScreenLocation = GameData.getLocationOnScreen(Point())
+        g2d.stroke = BasicStroke(5f * GameData.scale)
+        val zeroZeroScreenLocation = GameData.getLocationOnScreen(Point())
+        if (zeroZeroScreenLocation.x in 0F..xMax) {
+            g2d.draw(Line2D.Float(zeroZeroScreenLocation.x, 0F, zeroZeroScreenLocation.x, yMax))
+        }
+        if (zeroZeroScreenLocation.y in 0F..yMax) {
+            g2d.draw(Line2D.Float(0F, zeroZeroScreenLocation.y, xMax, zeroZeroScreenLocation.y))
+        }
     }
 
     private fun drawCircuits(g2d: Graphics2D) {
@@ -143,57 +174,49 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
             GameData.xLocation + (size.width / GameData.scale).toInt(),
             GameData.yLocation + (size.height / GameData.scale).toInt()
         )
-        val wiresDrawn = mutableSetOf<Long>()
         for (chunkX in firstChunk.x..lastChunk.x) {
             for (chunkY in firstChunk.y..lastChunk.y) {
                 val chunk = GameData.project.chunks[Point(chunkX, chunkY)]
                 if (chunk === null) continue
-                drawChunk(g2d, wiresDrawn, chunk)
+                drawChunk(g2d, chunk)
             }
         }
     }
 
     private fun drawChunk(
         g2d: Graphics2D,
-        drawnWires: MutableSet<Long>,
         chunk: List<Node>
     ) {
         chunk.forEach { node ->
             val nodeScreenLocation = GameData.getPointOnScreen(Point(node.x, node.y))
             SimObjectDrawer.drawNode(
                 node.type,
-                node.output > 0,
+                node.output,
                 nodeScreenLocation,
                 g2d,
                 this
             )
             if (GameData.scale < 0.125) return@forEach
-            drawNodeWires(g2d, drawnWires, node)
+            drawNodeWires(g2d, node)
         }
     }
 
-    private fun drawNodeWires(g2d: Graphics2D, drawnWires: MutableSet<Long>, node: Node) {
+    private fun drawNodeWires(g2d: Graphics2D, node: Node) {
         val nodeScreenLocation = GameData.getPointOnScreen(Point(node.x, node.y))
         node.inputWires.forEach {
-            if (it.id in drawnWires) return@forEach
-            drawnWires.add(it.id)
             SimObjectDrawer.drawWire(
                 GameData.getPointOnScreen(Point(it.input.x, it.input.y)),
                 nodeScreenLocation,
-                it.input.output > 0,
-                GameData.scale,
+                it.input.output,
                 g2d,
                 this
             )
         }
         node.outputWires.forEach {
-            if (it.id in drawnWires) return@forEach
-            drawnWires.add(it.id)
             SimObjectDrawer.drawWire(
                 nodeScreenLocation,
                 GameData.getPointOnScreen(Point(it.input.x, it.input.y)),
-                node.output > 0,
-                GameData.scale,
+                node.output,
                 g2d,
                 this
             )
@@ -201,8 +224,8 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
     }
 
     private fun drawHUD(g2d: Graphics2D) {
-        val yLocation = (size.getHeight() - (49 * 2) + 10).toInt()
-        val closeXLocation = (size.getWidth() - (88 * 2) - 10).toInt()
+        val yLocation = (size.getHeight() - 49 - 10).toInt()
+        val closeXLocation = (size.getWidth() - 98).toInt()
         changeHUDLocations(yLocation, closeXLocation)
         g2d.drawImage(place, placeLocation.x, placeLocation.y, this)
         g2d.drawImage(connect, connectLocation.x, connectLocation.y, this)
@@ -212,10 +235,13 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
         g2d.color = Color.GREEN
         g2d.stroke = BasicStroke(5F)
         when (GameData.currentTool) {
-            ToolType.place -> g2d.drawOval(4, yLocation - 1, 51, 51)
-            ToolType.connect -> g2d.drawOval(59, yLocation - 1, 51, 51)
-            ToolType.interact -> g2d.drawOval(114, yLocation - 1, 51, 51)
-            ToolType.delete -> g2d.drawOval(169, yLocation - 1, 51, 51)
+            ToolType.place -> {
+                g2d.drawOval(placeLocation.x - 1, yLocation - 1, 51, 51)
+                drawPlacementNodes(g2d)
+            }
+            ToolType.connect -> g2d.drawOval(connectLocation.x - 1, yLocation - 1, 51, 51)
+            ToolType.interact -> g2d.drawOval(interactLocation.x - 1, yLocation - 1, 51, 51)
+            ToolType.delete -> g2d.drawOval(deleteLocation.x - 1, yLocation - 1, 51, 51)
         }
     }
 
@@ -227,15 +253,35 @@ object GameUI : JPanel(), KeyListener, MouseListener, MouseMotionListener, Mouse
         closeLocation.x = closeXLocation
     }
 
+    private fun drawPlacementNodes(g2d: Graphics2D) {
+        val nodeYLocations = placeLocation.y - 60
+        val nodeCircle = Ellipse2D.Float(
+            when(GameData.currentPlaceType) {
+                NodeType.inverter -> 10
+                NodeType.switch -> 130
+                NodeType.switchOn -> -200
+                NodeType.light -> 70
+            }.toFloat(),
+            nodeYLocations.toFloat(),
+            50F, 50F
+        )
+        g2d.color = Color.CYAN
+        g2d.stroke = BasicStroke(6F)
+        g2d.fill(nodeCircle)
+        g2d.drawImage(SimObjectDrawer.inverterOn, placeLocation.x - 1, nodeYLocations - 1, this)
+        g2d.drawImage(SimObjectDrawer.lightOff, connectLocation.x + 5, nodeYLocations + 5, this)
+        g2d.drawImage(SimObjectDrawer.switchOff, interactLocation.x + 5, nodeYLocations + 5, this)
+    }
+
     override fun focusGained(e: FocusEvent) {
         if (GameData.isFocused) return
         GameData.isFocused = true
-        GameDriver.timer.start()
+        GameDriver.startTimers()
     }
 
     override fun focusLost(e: FocusEvent) {
         if (!GameData.isFocused) return
         GameData.isFocused = false
-        GameDriver.timer.stop()
+        GameDriver.stopTimers()
     }
 }

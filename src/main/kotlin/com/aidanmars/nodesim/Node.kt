@@ -5,10 +5,10 @@ data class Node(
     val type: NodeType,
     var x: Int,
     var y: Int,
-    val inputWires: MutableList<Wire>,
-    val outputWires: MutableList<Wire>,
-    var inputPower: Int,
-    var output: Byte
+    val inputWires: MutableList<Wire> = mutableListOf(),
+    val outputWires: MutableList<Wire> = mutableListOf(),
+    var inputPower: Int = 0,
+    var output: Boolean = type.update(0)
 ) {
     fun update() {
         output = type.update(inputPower)

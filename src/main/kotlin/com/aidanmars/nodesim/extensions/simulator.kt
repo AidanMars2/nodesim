@@ -9,8 +9,8 @@ fun Project.tick() {
         if (node.id !in nodes) return@forEach
         val oldOutput = node.output
         node.update()
-        val decrementWires = oldOutput > node.output
-        val incrementWires = node.output > oldOutput
+        val decrementWires = oldOutput && !node.output
+        val incrementWires = node.output && !oldOutput
 
         node.outputWires.forEach { wire ->
             when {

@@ -23,7 +23,7 @@ class Project(
         from.outputWires.add(newWire)
         to.inputWires.add(newWire)
         wires[newWire.id] = newWire
-        if (update && from.output > 0) {
+        if (update && from.output) {
             incrementNodePower(to)
         }
         return newWire
@@ -34,7 +34,7 @@ class Project(
         wire.input.outputWires.remove(wire)
         wire.output.inputWires.remove(wire)
         wires.remove(wire.id)
-        if (update && wire.input.output > 0 && wire.output.id in nodes) {
+        if (update && wire.input.output && wire.output.id in nodes) {
             decrementNodePower(wire.output)
         }
     }
@@ -42,13 +42,8 @@ class Project(
     fun createNode(x: Int, y: Int, type: NodeType, update: Boolean = true): Node {
         val node = Node(
             getNewNodeId(),
-            type,
-            x,
-            y,
-            mutableListOf(),
-            mutableListOf(),
-            0,
-            if (update) type.update(0) else 0
+            type, x, y,
+            output = update && type.update(0)
         )
         nodes[node.id] = node
         chunks.getOrPut(getChunk(x, y)) { mutableListOf() }.add(node)
@@ -94,7 +89,7 @@ class Project(
         if (node.inputPower == 0) updates.add(node)
     }
 
-    fun getNewNodeId(): Long {
+    private fun getNewNodeId(): Long {
         var id = random.nextLong()
         while (id in nodes) {
             id = random.nextLong()
@@ -102,7 +97,7 @@ class Project(
         return id
     }
 
-    fun getNewWireId(): Long {
+    private fun getNewWireId(): Long {
         var id = random.nextLong()
         while (id in wires) {
             id = random.nextLong()

@@ -1,31 +1,31 @@
 package com.aidanmars.nodesim.game
 
 import com.aidanmars.nodesim.NodeType
-import java.awt.*
+import java.awt.BasicStroke
 import java.awt.BasicStroke.CAP_ROUND
 import java.awt.BasicStroke.JOIN_ROUND
+import java.awt.Color
+import java.awt.Graphics2D
+import java.awt.Point
 import java.awt.geom.AffineTransform
 import java.awt.geom.Line2D
 import java.awt.geom.Rectangle2D
 import java.awt.image.AffineTransformOp
 import java.awt.image.BufferedImage
 import java.awt.image.ImageObserver
-import java.io.File
 import java.io.InputStream
 import javax.imageio.ImageIO
-import kotlin.math.atan
 
 
 object SimObjectDrawer {
-    const val isProduction = false
     private val wireSectionOff: BufferedImage = ImageIO.read(resourceInputStreamOf("images/arrow_off.svg"))
     private val wireSectionOn: BufferedImage = ImageIO.read(resourceInputStreamOf("images/arrow_on.svg"))
-    private val inverterOn: BufferedImage = ImageIO.read(resourceInputStreamOf("images/inverter_on.svg"))
+    val inverterOn: BufferedImage = ImageIO.read(resourceInputStreamOf("images/inverter_on.svg"))
     private val inverterOff: BufferedImage = ImageIO.read(resourceInputStreamOf("images/inverter_off.svg"))
     private val lightOn: BufferedImage = ImageIO.read(resourceInputStreamOf("images/light_on.svg"))
-    private val lightOff: BufferedImage = ImageIO.read(resourceInputStreamOf("images/light_off.svg"))
+    val lightOff: BufferedImage = ImageIO.read(resourceInputStreamOf("images/light_off.svg"))
     private val switchOn: BufferedImage = ImageIO.read(resourceInputStreamOf("images/switch_on.svg"))
-    private val switchOff: BufferedImage = ImageIO.read(resourceInputStreamOf("images/switch.svg"))
+    val switchOff: BufferedImage = ImageIO.read(resourceInputStreamOf("images/switch.svg"))
     private var wireSectionOffScaled: BufferedImage = wireSectionOff
     private var wireSectionOnScaled: BufferedImage = wireSectionOn
     private var inverterOnScaled: BufferedImage = inverterOn
@@ -34,14 +34,13 @@ object SimObjectDrawer {
     private var lightOffScaled: BufferedImage = lightOff
     private var switchOnScaled: BufferedImage = switchOn
     private var switchOffScaled: BufferedImage = switchOff
-    private var scale = 1.0
+    private var scale = 1.0F
     private var nodeSize = 50/*size of node image*/ * scale
 
     fun drawWire(
         point1: Point,
         point2: Point,
         power: Boolean,
-        scale: Double,
         g2D: Graphics2D,
         observer: ImageObserver?
     ) {
@@ -86,26 +85,14 @@ object SimObjectDrawer {
         g2d.drawImage(op.filter(image, null), drawLocationX, drawLocationY, observer)
     }
 
-    private fun angleBetweenPoints(point1: Point, point2: Point): Double {
-        val dx = point1.x - point2.x.toDouble()
-        val dy = point1.y - point2.y.toDouble()
-        return Math.toDegrees(atan((dx / dy))) + if (dy < 0) 180 else 0
-    }
-
-    private fun Point.middle(other: Point) =
-        Point(x - (x - other.x shr 1), y - (y - other.y shr 1))
-
-    private fun Point.asMiddleOf(image: BufferedImage) =
-        Point(x + (image.width shr 1), y + (image.height shr 1))
-
     fun resourceInputStreamOf(path: String): InputStream? {
         return javaClass.classLoader.getResourceAsStream(path)
     }
 
-    fun initScale(scale: Double) {
+    fun initScale(scale: Float) {
         this.scale = scale
         nodeSize = 50/*size of node image*/ * scale
-        val tx = AffineTransform.getScaleInstance(scale, scale)
+        val tx = AffineTransform.getScaleInstance(scale.toDouble(), scale.toDouble())
         val op = AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR)
         wireSectionOnScaled = op.filter(wireSectionOn, null)
         wireSectionOffScaled = op.filter(wireSectionOff, null)
@@ -132,7 +119,7 @@ object SimObjectDrawer {
                 NodeType.switchOn -> switchOnColor
                 NodeType.light -> if (power) lightOnColor else lightOffColor
             }
-            graphics2D.fill(Rectangle2D.Double(location.getX(), location.getY(), nodeSize, nodeSize))
+            graphics2D.fill(Rectangle2D.Float(location.x.toFloat(), location.y.toFloat(), nodeSize, nodeSize))
             return
         }
         val image = when (type) {
@@ -141,14 +128,14 @@ object SimObjectDrawer {
             NodeType.switchOn -> switchOnScaled
             NodeType.light -> if (power) lightOnScaled else lightOffScaled
         }
-        val drawLocation = location.asMiddleOf(image)
+        val drawLocation = location.fromMiddleOf(image)
         graphics2D.drawImage(image, drawLocation.x, drawLocation.y, observer)
     }
 
     private val inverterOnColor = Color(0, 200, 200)
     private val inverterOffColor = Color(0, 100, 100)
-    private val switchOnColor = Color(255, 50, 0)
-    private val switchOffColor = Color(120, 20, 0)
+    private val switchOnColor = Color(255, 40, 0)
+    private val switchOffColor = Color(120, 10, 0)
     private val lightOnColor = Color(200, 200, 200)
     private val lightOffColor = Color(25, 25, 25)
 }
