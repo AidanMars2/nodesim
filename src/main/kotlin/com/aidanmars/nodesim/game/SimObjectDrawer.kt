@@ -15,6 +15,10 @@ import java.awt.image.BufferedImage
 import java.awt.image.ImageObserver
 import java.io.InputStream
 import javax.imageio.ImageIO
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.sin
 
 
 object SimObjectDrawer {
@@ -44,46 +48,75 @@ object SimObjectDrawer {
         g2D: Graphics2D,
         observer: ImageObserver?
     ) {
-        val rotation = angleBetweenPoints(point1, point2)
-        val middle = point1.middle(point2).asMiddleOf(wireSectionOnScaled)
-        drawRotatedImage(
-            if (power) wireSectionOnScaled else wireSectionOffScaled,
-            g2D,
-            observer,
-            middle.x,
-            middle.y,
-            rotation
-        )
-        val lineThickness = (10.0 * scale).toFloat()
+//        val rotation = (-angleBetweenPoints(point1, point2) + 90) % 360
+//        val rotatedImage = rotate(if (power) wireSectionOnScaled else wireSectionOffScaled, Math.toRadians(rotation))
+//        val middle = point1.middle(point2).asMiddleOf(rotatedImage)
+//        g2D.drawImage(rotatedImage, middle.x, middle.y, observer)
+        //TODO: draw arrow in middle of wire
+
+        val lineThickness = 7.0F * scale
         g2D.stroke = BasicStroke(lineThickness, CAP_ROUND, JOIN_ROUND)
         g2D.color = Color.BLACK
         g2D.draw(Line2D.Float(point1, point2))
 
-        val powerLineThickness = lineThickness * 0.8F
+        val powerLineThickness = lineThickness * 0.6F
         g2D.stroke = BasicStroke(powerLineThickness, CAP_ROUND, JOIN_ROUND)
         g2D.color = if (power) Color.YELLOW else Color.DARK_GRAY
         g2D.draw(Line2D.Float(point1, point2))
     }
-
-    private fun drawRotatedImage(
-        image: BufferedImage,
-        g2d: Graphics2D,
-        observer: ImageObserver?,
-        drawLocationX: Int,
-        drawLocationY: Int,
-        rotation: Double
-    ) {
-
-        // Rotation information
-        val rotationRequired = Math.toRadians(rotation)
-        val locationX = (image.width shr 1).toDouble()
-        val locationY = (image.height shr 1).toDouble()
-        val tx = AffineTransform.getRotateInstance(rotationRequired, locationX, locationY)
-        val op = AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR)
-
-        // Drawing the rotated image at the required drawing locations
-        g2d.drawImage(op.filter(image, null), drawLocationX, drawLocationY, observer)
-    }
+//
+//    private fun drawRotatedImage(
+//        image: BufferedImage,
+//        g2d: Graphics2D,
+//        observer: ImageObserver?,
+//        drawLocationX: Int,
+//        drawLocationY: Int,
+//        rotation: Double
+//    ) {
+//
+//        // Rotation information
+//        val rotationRequired = Math.toRadians(rotation)
+//        val tx = AffineTransform.getRotateInstance(rotationRequired,
+//            image.getWidth(null) * 0.5, image.getHeight(null) * 0.5)
+//        val op = AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR)
+//        // Drawing the rotated image at the required drawing locations
+//        g2d.drawImage(op.filter(image, null), drawLocationX, drawLocationY, observer)
+//    }
+//
+//    private fun rotateImage(image: BufferedImage, angle: Double): BufferedImage { //n rotation in degrees
+//        val rotationRequired = Math.toRadians(angle)
+//        val locationX = (image.width / 2).toDouble()
+//        val locationY = (image.height / 2).toDouble()
+//        val tx = AffineTransform.getRotateInstance(rotationRequired, locationX, locationY)
+//        val op = AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR)
+//        val newImage = BufferedImage(image.width, image.height, image.type)
+//        op.filter(image, newImage)
+//
+//        return newImage
+//    }
+//
+//    private fun rotate(image: BufferedImage, angle: Double): BufferedImage {
+//        val sin = abs(sin(angle))
+//        val cos = abs(cos(angle))
+//        val width = image.width
+//        val height = image.height
+//        val newWidth = floor(width * cos + height * sin).toInt()
+//        val newHeight = floor(height * cos + width * sin).toInt()
+//        val result = deepCopy(image)
+//        val g = result.createGraphics()
+//        g.translate((newWidth - width) / 2, (newHeight - height) / 2)
+//        g.rotate(angle, (width / 2).toDouble(), (height / 2).toDouble())
+//        g.drawRenderedImage(image, null)
+//        g.dispose()
+//        return result
+//    }
+//
+//    private fun deepCopy(bi: BufferedImage): BufferedImage {
+//        val cm = bi.colorModel
+//        val isAlphaPremultiplied = cm.isAlphaPremultiplied
+//        val raster = bi.raster.createCompatibleWritableRaster()
+//        return BufferedImage(cm, raster, isAlphaPremultiplied, null)
+//    }
 
     fun resourceInputStreamOf(path: String): InputStream? {
         return javaClass.classLoader.getResourceAsStream(path)

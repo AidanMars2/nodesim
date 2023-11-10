@@ -1,8 +1,10 @@
 package com.aidanmars.nodesim
 
+import java.awt.Point
+
 data class Node(
     val id: Long,
-    val type: NodeType,
+    var type: NodeType,
     var x: Int,
     var y: Int,
     val inputWires: MutableList<Wire> = mutableListOf(),
@@ -13,6 +15,8 @@ data class Node(
     fun update() {
         output = type.update(inputPower)
     }
+
+    fun point(): Point = Point(x, y)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

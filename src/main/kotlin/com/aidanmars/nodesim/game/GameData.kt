@@ -8,8 +8,8 @@ import java.util.concurrent.LinkedBlockingQueue
 
 object GameData {
     var project = Project()
-    var xLocation = 0
-    var yLocation = 0
+    var xLocation = -320
+    var yLocation = -240
     var scale = 1.0F
     var currentTool = ToolType.interact
     var currentPlaceType = NodeType.switch
@@ -17,7 +17,8 @@ object GameData {
     var selectionPoint2 = Point()
     var isFocused = GameUI.isFocusOwner
     val wasdKeysPressed = BooleanArray(4)// w, a, s, d
-    val clickQueue = LinkedBlockingQueue<Point>()
+    var mousePressed = false
+    val clickQueue = LinkedBlockingQueue<Input>()
 
 
     fun getLocationOnScreen(point: Point): Point2D.Float = Point2D.Float(
@@ -31,8 +32,8 @@ object GameData {
     )
 
     fun getLocationInWorld(point: Point): Point = Point(
-        ((point.x + xLocation) / scale).toInt(),
-        ((point.y + yLocation) / scale).toInt()
+        ((point.x / scale).toInt() + xLocation),
+        ((point.y / scale).toInt() + yLocation)
     )
 
     fun checkData() {
@@ -56,8 +57,12 @@ object GameData {
             point.distance(GameUI.connectLocation.asMiddleOf(GameUI.connect)) <= 22 -> currentTool = ToolType.connect
             point.distance(GameUI.deleteLocation.asMiddleOf(GameUI.delete)) <= 22 -> currentTool = ToolType.delete
             else -> {
-                clickQueue.put(getLocationInWorld(point))
+                clickQueue.put(Input(Input.InputType.click, Point(), getLocationInWorld(point)))
             }
         }
+    }
+
+    fun handleDrag(from: Point, to: Point) {
+        clickQueue.put(Input(Input.InputType.drag, getLocationInWorld(from), getLocationInWorld(to)))
     }
 }

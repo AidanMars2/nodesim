@@ -69,6 +69,21 @@ class Project(
         node.y = y
     }
 
+    fun updateNode(node: Node) {
+        if (node.id !in nodes) return
+        val oldOutput = node.output
+        node.update()
+        val decrementWires = oldOutput && !node.output
+        val incrementWires = node.output && !oldOutput
+
+        node.outputWires.forEach { wire ->
+            when {
+                decrementWires -> decrementNodePower(wire.output)
+                incrementWires -> incrementNodePower(wire.output)
+            }
+        }
+    }
+
     private fun nodeExists(node: Node): Boolean = (node === nodes[node.id])
     private fun wireExists(wire: Wire): Boolean = (wire === wires[wire.id])
 
@@ -79,12 +94,12 @@ class Project(
         }
     }
 
-    fun incrementNodePower(node: Node) {
+    private fun incrementNodePower(node: Node) {
         node.inputPower++
         if (node.inputPower == 1) updates.add(node)
     }
 
-    fun decrementNodePower(node: Node) {
+    private fun decrementNodePower(node: Node) {
         node.inputPower--
         if (node.inputPower == 0) updates.add(node)
     }
