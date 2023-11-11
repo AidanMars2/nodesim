@@ -3,8 +3,7 @@ package com.aidanmars.nodesim.lwjglgame.data
 data class Input(
     val type: Type,
     val mods: Int,
-    val mouseLocationX: Float,
-    val mouseLocationY: Float,
+    val mouseLocation: Location,
     val mouseInScreen: Boolean,
     val doubleValue: Double = 0.0,
     val floatValue: Float = 0.0f,

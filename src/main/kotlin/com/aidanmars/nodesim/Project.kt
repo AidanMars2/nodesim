@@ -2,13 +2,14 @@ package com.aidanmars.nodesim
 
 import java.awt.Point
 import java.util.Random
+import java.util.concurrent.ConcurrentHashMap
 
 class Project(
-    val nodes: MutableMap<Long, Node> = mutableMapOf(),
-    val wires: MutableMap<Long, Wire> = mutableMapOf(),
+    val nodes: ConcurrentHashMap<Long, Node> = ConcurrentHashMap(),
+    val wires: ConcurrentHashMap<Long, Wire> = ConcurrentHashMap(),
     val updates: MutableSet<Node> = mutableSetOf(),
     private val random: Random = Random(),
-    val chunks: MutableMap<Point, MutableList<Node>> = mutableMapOf()
+    val chunks: ConcurrentHashMap<WorldLocation, MutableList<Node>> = ConcurrentHashMap()
 ) {
     /**
      * @return the new wire, or null if either the from or to node don't exist within this project
@@ -34,7 +35,7 @@ class Project(
         wire.input.outputWires.remove(wire)
         wire.output.inputWires.remove(wire)
         wires.remove(wire.id)
-        if (update && wire.input.output && wire.output.id in nodes) {
+        if (update && wire.input.output && nodes.containsKey(wire.output.id)) {
             decrementNodePower(wire.output)
         }
     }
@@ -69,17 +70,19 @@ class Project(
         node.y = y
     }
 
-    fun updateNode(node: Node) {
-        if (node.id !in nodes) return
+    fun updateNode(node: Node): () -> Unit {
+        if (!nodes.containsKey(node.id)) return {}
         val oldOutput = node.output
         node.update()
         val decrementWires = oldOutput && !node.output
         val incrementWires = node.output && !oldOutput
 
-        node.outputWires.forEach { wire ->
-            when {
-                decrementWires -> decrementNodePower(wire.output)
-                incrementWires -> incrementNodePower(wire.output)
+        return {
+            node.outputWires.forEach { wire ->
+                when {
+                    decrementWires -> decrementNodePower(wire.output)
+                    incrementWires -> incrementNodePower(wire.output)
+                }
             }
         }
     }
@@ -90,7 +93,7 @@ class Project(
     fun verifyWires() {
         wires.keys.toList().forEach { wireId ->
             val wire = wires[wireId]!!
-            if (wire.input.id !in nodes || wire.output.id !in nodes) deleteWire(wire)
+            if (nodes.containsKey(wire.input.id) || nodes.containsKey(wire.output.id)) deleteWire(wire)
         }
     }
 
@@ -106,7 +109,7 @@ class Project(
 
     private fun getNewNodeId(): Long {
         var id = random.nextLong()
-        while (id in nodes) {
+        while (nodes.containsKey(id)) {
             id = random.nextLong()
         }
         return id
@@ -114,7 +117,7 @@ class Project(
 
     private fun getNewWireId(): Long {
         var id = random.nextLong()
-        while (id in wires) {
+        while (wires.containsKey(id)) {
             id = random.nextLong()
         }
         return id

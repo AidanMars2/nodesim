@@ -22,12 +22,10 @@ enum class NodeType {
             renderer.drawCircle(posX, posY, 38.5f * scale, 10f * scale,
                 if (power) inverterOnMainColor else inverterOffMainColor)
 
-            renderer.draw(GL_TRIANGLE_STRIP) {
-                // border lines
-                renderer.drawCircleUnsafe(posX, posY, 44f * scale, 6f * scale, black)
-                renderer.drawCircleUnsafe(posX, posY, 33f * scale, 6f * scale, black)
-                renderer.drawCircleUnsafe(posX, posY, 22f * scale, 6f * scale, black)
-            }
+            // border lines
+            renderer.drawCircle(posX, posY, 44f * scale, 6f * scale, black)
+            renderer.drawCircle(posX, posY, 33f * scale, 6f * scale, black)
+            renderer.drawCircle(posX, posY, 22f * scale, 6f * scale, black)
         }
     },
     switch {
@@ -39,11 +37,9 @@ enum class NodeType {
             // main indicator circle
             renderer.fillCircle(posX, posY, 33f * scale, switchOffColor)
 
-            renderer.draw(GL_TRIANGLE_STRIP) {
-                // border lines
-                renderer.drawCircleUnsafe(posX, posY, 44f, 6f * scale, black)
-                renderer.drawCircleUnsafe(posX, posY, 33f, 6f * scale, black)
-            }
+            // border lines
+            renderer.drawCircle(posX, posY, 44f, 6f * scale, black)
+            renderer.drawCircle(posX, posY, 33f, 6f * scale, black)
         }
     },
     switchOn {
@@ -57,11 +53,9 @@ enum class NodeType {
             // main indicator circle
             renderer.fillCircle(posX, posY, 33f * scale, switchOnColor, red)
 
-            renderer.draw(GL_TRIANGLE_STRIP) {
-                // border lines
-                renderer.drawCircleUnsafe(posX, posY, 44f, 6f * scale, black)
-                renderer.drawCircleUnsafe(posX, posY, 33f, 6f * scale, black)
-            }
+            // border lines
+            renderer.drawCircleUnsafe(posX, posY, 44f, 6f * scale, black)
+            renderer.drawCircleUnsafe(posX, posY, 33f, 6f * scale, black)
         }
     },
     light {
@@ -79,11 +73,9 @@ enum class NodeType {
             }
             // main structure
             renderer.fillCircle(posX, posY, 22f * scale, nodeStructureColor)
-            renderer.draw(GL_TRIANGLE_STRIP) {
-                // seperator lines
-                renderer.drawCircleUnsafe(posX, posY, 44f * scale, 6f * scale, black)
-                renderer.drawCircleUnsafe(posX, posY, 22f * scale, 6f * scale, black)
-            }
+            // seperator lines
+            renderer.drawCircleUnsafe(posX, posY, 44f * scale, 6f * scale, black)
+            renderer.drawCircleUnsafe(posX, posY, 22f * scale, 6f * scale, black)
         }
     };
 

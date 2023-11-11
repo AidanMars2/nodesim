@@ -1,10 +1,13 @@
 package com.aidanmars.nodesim.lwjglgame
 
+import com.aidanmars.nodesim.extensions.tick
 import com.aidanmars.nodesim.lwjglgame.data.Input
 import com.aidanmars.nodesim.lwjglgame.rendering.Renderer
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFWErrorCallback
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.logging.Level
+import java.util.logging.Logger
 
 object Game {
     private lateinit var errorCallBack: GLFWErrorCallback
@@ -15,6 +18,8 @@ object Game {
     private val renderer = Renderer()
     private var windowWidth = 640
     private var windowHeight = 480
+    private val timer = Timer()
+    private val gameRenderer = GameRenderer(renderer, state)
 
     private fun runGraphics() {
         init()
@@ -24,7 +29,13 @@ object Game {
 
     private fun runSimulation() {
         // do simulation async
-        TODO()
+        Thread {
+            while (running) {
+                state.handleInput(inputQueue)
+                state.project.tick()
+                sync(40)// force tick rate
+            }
+        }.start()
     }
 
     fun run() {
@@ -53,6 +64,7 @@ object Game {
 
             window.update()
         }
+        running = false
     }
 
     private fun setWindowSize(width: Int, height: Int) {
@@ -61,8 +73,7 @@ object Game {
     }
 
     private fun render() {
-        renderer.setScale(1 / (windowWidth * 0.5f), 1 / (windowHeight * 0.5f))
-        TODO()
+        gameRenderer.render(windowWidth, windowHeight)
     }
 
     private fun dispose() {
@@ -70,5 +81,29 @@ object Game {
         window.destroy()
         GLFW.glfwTerminate()
         errorCallBack.free()
+    }
+
+    /**
+     * Synchronizes the game at specified updates per second.
+     *
+     * @param ups updates per second
+     */
+    private fun sync(ups: Int) {
+        val lastLoopTime: Double = timer.lastLoopTime
+        var now: Double = timer.time
+        val targetTime = 1f / ups
+        while (now - lastLoopTime < targetTime) {
+            Thread.yield()
+
+            /* This is optional if you want your game to stop consuming too much
+             * CPU but you will loose some accuracy because Thread.sleep(1)
+             * could sleep longer than 1 millisecond */
+            try {
+                Thread.sleep(1)
+            } catch (ex: InterruptedException) {
+                Logger.getLogger(Game::class.java.getName()).log(Level.SEVERE, null, ex)
+            }
+            now = timer.time
+        }
     }
 }

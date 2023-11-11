@@ -1,6 +1,7 @@
 package com.aidanmars.nodesim.lwjglgame
 
 import com.aidanmars.nodesim.lwjglgame.data.Input
+import com.aidanmars.nodesim.lwjglgame.data.Location
 import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.Callbacks
 import org.lwjgl.glfw.GLFW
@@ -20,7 +21,7 @@ import kotlin.math.floor
  * @author Heiko Brumme
  */
 class Window(
-    width: Int, height: Int, title: CharSequence,
+    private var width: Int, private var height: Int, title: CharSequence,
     private var isVSyncEnabled: Boolean,
     private val inputQueue: LinkedBlockingQueue<Input>,
     private val setWindowSize: (width: Int, height: Int) -> Unit
@@ -30,8 +31,6 @@ class Window(
     private val mouseButtonCallback: GLFWMouseButtonCallback
     private val windowSizeCallBack: GLFWFramebufferSizeCallback
     private val scrollCallback: GLFWScrollCallback
-    private var width = width
-    private var height = height
 
     init {
 
@@ -96,7 +95,7 @@ class Window(
                 when (action) {
                     GLFW.GLFW_PRESS -> Input.Type.keyPress
                     else -> Input.Type.keyRelease
-                }, mods, mouseScreenLocation.first, mouseScreenLocation.second,
+                }, mods, mouseScreenLocation,
                     pixelPointInScreen(mouseLocation),
                     value = key
             ))
@@ -112,7 +111,7 @@ class Window(
                 when (action) {
                     GLFW.GLFW_PRESS -> Input.Type.mousePress
                     else -> Input.Type.mouseRelease
-                }, mods, mouseScreenLocation.first, mouseScreenLocation.second,
+                }, mods, mouseScreenLocation,
                     pixelPointInScreen(mouseLocation),
                     value = button
             ))
@@ -127,7 +126,7 @@ class Window(
                 Input(
                     Input.Type.scroll,
                     0,
-                    mouseScreenLocation.first, mouseScreenLocation.second,
+                    mouseScreenLocation,
                     pixelPointInScreen(mouseLocation),
                     yoffset
                 )
@@ -135,8 +134,8 @@ class Window(
         }
     }
 
-    private fun pixelPointInScreen(point: Pair<Int, Int>): Boolean {
-        return point.first in 0..width && point.second in 0..height
+    private fun pixelPointInScreen(point: Location): Boolean {
+        return point.x in 0f..width.toFloat() && point.y in 0f..height.toFloat()
     }
 
     private fun getNewFrameBufferSizeCallBack() = object : GLFWFramebufferSizeCallback() {
@@ -146,11 +145,11 @@ class Window(
         }
     }
 
-    fun getMouseLocation(): Pair<Int, Int> {
+    fun getMouseLocation(): Location {
         val posX = BufferUtils.createDoubleBuffer(1)
         val posY = BufferUtils.createDoubleBuffer(1)
         GLFW.glfwGetCursorPos(handle, posX, posY)
-        return floor(posX[0]).toInt() to floor(posY[0]).toInt()
+        return Location(floor(posX[0]).toFloat(), floor(posY[0]).toFloat())
     }
 
     val isClosing: Boolean
@@ -198,7 +197,7 @@ class Window(
 
     fun swapBuffers() = GLFW.glfwSwapBuffers(handle)
 
-    private fun Pair<Int, Int>.toRenderScreenLocation(): Pair<Float, Float> {
-        return first.toFloat() - (width shr 1) to second.toFloat() - (height shr 1)
+    private fun Location.toRenderScreenLocation(): Location {
+        return Location(x - (width shr 1), y - (height shr 1))
     }
 }
