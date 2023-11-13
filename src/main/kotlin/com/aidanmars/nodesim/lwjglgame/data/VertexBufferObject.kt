@@ -1,4 +1,4 @@
-package com.aidanmars.nodesim.lwjglgame.rendering
+package com.aidanmars.nodesim.lwjglgame.data
 
 import org.lwjgl.opengl.GL15
 import java.nio.FloatBuffer

@@ -1,14 +1,15 @@
-package com.aidanmars.nodesim.lwjglgame
+package com.aidanmars.nodesim.lwjglgame.rendering
 
 import com.aidanmars.nodesim.Node
 import com.aidanmars.nodesim.Wire
 import com.aidanmars.nodesim.WorldLocation
 import com.aidanmars.nodesim.getChunk
+import com.aidanmars.nodesim.lwjglgame.GameData
+import com.aidanmars.nodesim.lwjglgame.ToolType
+import com.aidanmars.nodesim.lwjglgame.angleBetweenPoints
 import com.aidanmars.nodesim.lwjglgame.data.Color
 import com.aidanmars.nodesim.lwjglgame.data.Location
 import com.aidanmars.nodesim.lwjglgame.data.Point
-import com.aidanmars.nodesim.lwjglgame.rendering.Renderer
-import com.aidanmars.nodesim.lwjglgame.rendering.drawLine
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -17,6 +18,17 @@ class GameRenderer(
     val renderer: Renderer,
     val state: GameData,
 ) {
+    fun init() {
+        state.registerHUDElement(placeElement)
+        state.registerHUDElement(connectElement)
+        state.registerHUDElement(interactElement)
+        state.registerHUDElement(deleteElement)
+        state.registerHUDElement(inverterElement)
+        state.registerHUDElement(lightElement)
+        state.registerHUDElement(switchElement)
+        state.registerHUDElement(closeElement)
+    }
+
     fun render(windowWidth: Int, windowHeight: Int) {
         val halfWidth = (windowWidth shr 1).toFloat()
         val halfHeight = (windowHeight shr 1).toFloat()
@@ -157,6 +169,7 @@ class GameRenderer(
         val numOfLinesY = ((halfGameHeight * 2) / 40) + 1
         val chunkLines = mutableListOf<Pair<Location, Location>>()
         val zeroZeroLines = mutableListOf<Pair<Location, Location>>()
+        val currentLineColor = if (state.currentTool == ToolType.delete) deleteLineColor else lineColor
         for (lineX in 0..numOfLinesX) {
             val gameXLocation = lineBeginX + (lineX * 40)
             val drawXLocation = state.getScreenLocation(gameXLocation, 0).x
@@ -171,8 +184,8 @@ class GameRenderer(
                 }
             }
             renderer.drawLine(
-                Point(drawXLocation, -halfHeight, lineColor),
-                Point(drawXLocation, halfHeight, lineColor),
+                Point(drawXLocation, -halfHeight, currentLineColor),
+                Point(drawXLocation, halfHeight, currentLineColor),
                 5f, false
             )
         }
@@ -190,8 +203,8 @@ class GameRenderer(
                 }
             }
             renderer.drawLine(
-                Point(-halfWidth, drawYLocation, lineColor),
-                Point(halfWidth, drawYLocation, lineColor),
+                Point(-halfWidth, drawYLocation, currentLineColor),
+                Point(halfWidth, drawYLocation, currentLineColor),
                 5f, false
             )
         }
@@ -211,6 +224,7 @@ class GameRenderer(
         }
     }
 
+    private val deleteLineColor = Color(1f, 0f, 0f)
     private val lineColor = Color(0.5f, 0.5f, 0.5f)
     private val zeroZeroLineColor = Color(0f, 0f, 0f)
     private val chunkLineColor = Color(0.25f, 0.25f, 0.25f)

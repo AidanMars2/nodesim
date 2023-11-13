@@ -1,7 +1,8 @@
-package com.aidanmars.nodesim.lwjglgame
+package com.aidanmars.nodesim.lwjglgame.rendering
 
 import com.aidanmars.nodesim.lwjglgame.data.Input
 import com.aidanmars.nodesim.lwjglgame.data.Location
+import com.aidanmars.nodesim.lwjglgame.toRenderScreenLocation
 import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.Callbacks
 import org.lwjgl.glfw.GLFW
@@ -21,7 +22,9 @@ import kotlin.math.floor
  * @author Heiko Brumme
  */
 class Window(
-    private var width: Int, private var height: Int, title: CharSequence,
+    var width: Int,
+    var height: Int,
+    title: CharSequence,
     private var isVSyncEnabled: Boolean,
     private val inputQueue: LinkedBlockingQueue<Input>,
     private val setWindowSize: (width: Int, height: Int) -> Unit
@@ -89,7 +92,7 @@ class Window(
     private fun getNewKeyCallBack(): GLFWKeyCallback = object : GLFWKeyCallback() {
         override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
             val mouseLocation = getMouseLocation()
-            val mouseScreenLocation = mouseLocation.toRenderScreenLocation()
+            val mouseScreenLocation = toRenderScreenLocation(mouseLocation)
             inputQueue.put(
                 Input(
                 when (action) {
@@ -105,7 +108,7 @@ class Window(
     private fun getNewMouseButtonCallBack() = object : GLFWMouseButtonCallback() {
         override fun invoke(window: Long, button: Int, action: Int, mods: Int) {
             val mouseLocation = getMouseLocation()
-            val mouseScreenLocation = mouseLocation.toRenderScreenLocation()
+            val mouseScreenLocation = toRenderScreenLocation(mouseLocation)
             inputQueue.put(
                 Input(
                 when (action) {
@@ -121,7 +124,7 @@ class Window(
     private fun getNewScrollCallBack() = object : GLFWScrollCallback() {
         override fun invoke(window: Long, xoffset: Double, yoffset: Double) {
             val mouseLocation = getMouseLocation()
-            val mouseScreenLocation = mouseLocation.toRenderScreenLocation()
+            val mouseScreenLocation = toRenderScreenLocation(mouseLocation)
             inputQueue.put(
                 Input(
                     Input.Type.scroll,
@@ -152,13 +155,14 @@ class Window(
         return Location(floor(posX[0]).toFloat(), floor(posY[0]).toFloat())
     }
 
-    val isClosing: Boolean
+    var isClosing: Boolean
         /**
          * Returns if the window is closing.
          *
          * @return true if the window should close, else false
          */
         get() = GLFW.glfwWindowShouldClose(handle)
+        set(value) = GLFW.glfwSetWindowShouldClose(handle, value)
 
     /**
      * Sets the window title
@@ -196,8 +200,4 @@ class Window(
     }
 
     fun swapBuffers() = GLFW.glfwSwapBuffers(handle)
-
-    private fun Location.toRenderScreenLocation(): Location {
-        return Location(x - (width shr 1), y - (height shr 1))
-    }
 }

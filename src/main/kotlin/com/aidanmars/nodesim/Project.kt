@@ -74,16 +74,11 @@ class Project(
         if (!nodes.containsKey(node.id)) return {}
         val oldOutput = node.output
         node.update()
-        val decrementWires = oldOutput && !node.output
-        val incrementWires = node.output && !oldOutput
 
-        return {
-            node.outputWires.forEach { wire ->
-                when {
-                    decrementWires -> decrementNodePower(wire.output)
-                    incrementWires -> incrementNodePower(wire.output)
-                }
-            }
+        return when {
+            oldOutput && !node.output -> { { node.outputWires.forEach { wire -> decrementNodePower(wire.output) } } }
+            node.output && !oldOutput -> { { node.outputWires.forEach { wire -> incrementNodePower(wire.output) } } }
+            else -> {{}}
         }
     }
 

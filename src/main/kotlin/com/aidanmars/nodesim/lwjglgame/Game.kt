@@ -2,7 +2,9 @@ package com.aidanmars.nodesim.lwjglgame
 
 import com.aidanmars.nodesim.extensions.tick
 import com.aidanmars.nodesim.lwjglgame.data.Input
+import com.aidanmars.nodesim.lwjglgame.rendering.GameRenderer
 import com.aidanmars.nodesim.lwjglgame.rendering.Renderer
+import com.aidanmars.nodesim.lwjglgame.rendering.Window
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFWErrorCallback
 import java.util.concurrent.LinkedBlockingQueue
@@ -31,6 +33,7 @@ object Game {
         // do simulation async
         Thread {
             while (running) {
+                state.tick(window.toRenderScreenLocation(window.getMouseLocation()))
                 state.handleInput(inputQueue)
                 state.project.tick()
                 sync(40)// force tick rate
@@ -41,6 +44,10 @@ object Game {
     fun run() {
         runSimulation()
         runGraphics()
+    }
+
+    fun end() {
+        window.isClosing = true
     }
 
     private fun init() {
@@ -54,6 +61,7 @@ object Game {
         windowHeight = 480
 
         renderer.init()
+        gameRenderer.init()
 
         running = true
     }
@@ -70,6 +78,8 @@ object Game {
     private fun setWindowSize(width: Int, height: Int) {
         windowWidth = width
         windowHeight = height
+        state.width = width
+        state.height = height
     }
 
     private fun render() {

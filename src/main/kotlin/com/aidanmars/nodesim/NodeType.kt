@@ -14,18 +14,18 @@ enum class NodeType {
         override fun render(renderer: Renderer, posX: Float, posY: Float, scale: Float, power: Boolean) {
             // glow if powered
             if (power) {
-                renderer.fillCircle(posX, posY, 53*scale, inverterOnMainColor, inverterFieldFadeColor)
+                renderer.fillCircle(posX, posY, 26.5f*scale, inverterOnMainColor, inverterFieldFadeColor)
             }
             // structure circle
-            renderer.fillCircle(posX, posY, 44f * scale, nodeStructureColor)
+            renderer.fillCircle(posX, posY, 22f * scale, nodeStructureColor)
             // main indicator color ring
-            renderer.drawCircle(posX, posY, 38.5f * scale, 10f * scale,
+            renderer.drawCircle(posX, posY, 19.25f * scale, 10f * scale,
                 if (power) inverterOnMainColor else inverterOffMainColor)
 
             // border lines
-            renderer.drawCircle(posX, posY, 44f * scale, 6f * scale, black)
-            renderer.drawCircle(posX, posY, 33f * scale, 6f * scale, black)
             renderer.drawCircle(posX, posY, 22f * scale, 6f * scale, black)
+            renderer.drawCircle(posX, posY, 16.5f * scale, 6f * scale, black)
+            renderer.drawCircle(posX, posY, 11f * scale, 6f * scale, black)
         }
     },
     switch {
@@ -33,13 +33,13 @@ enum class NodeType {
 
         override fun render(renderer: Renderer, posX: Float, posY: Float, scale: Float, power: Boolean) {
             // structure circle
-            renderer.fillCircle(posX, posY, 44f * scale, nodeStructureColor)
+            renderer.fillCircle(posX, posY, 22f * scale, nodeStructureColor)
             // main indicator circle
-            renderer.fillCircle(posX, posY, 33f * scale, switchOffColor)
+            renderer.fillCircle(posX, posY, 16.5f * scale, switchOffColor)
 
             // border lines
-            renderer.drawCircle(posX, posY, 44f, 6f * scale, black)
-            renderer.drawCircle(posX, posY, 33f, 6f * scale, black)
+            renderer.drawCircle(posX, posY, 22f, 6f * scale, black)
+            renderer.drawCircle(posX, posY, 16.5f, 6f * scale, black)
         }
     },
     switchOn {
@@ -47,15 +47,15 @@ enum class NodeType {
 
         override fun render(renderer: Renderer, posX: Float, posY: Float, scale: Float, power: Boolean) {
             // glow
-            renderer.fillCircle(posX, posY, 53f * scale, red, switchFieldFadeColor)
+            renderer.fillCircle(posX, posY, 27f * scale, red, switchFieldFadeColor)
             // structure circle
-            renderer.fillCircle(posX, posY, 44f * scale, nodeStructureColor)
+            renderer.fillCircle(posX, posY, 22f * scale, nodeStructureColor)
             // main indicator circle
-            renderer.fillCircle(posX, posY, 33f * scale, switchOnColor, red)
+            renderer.fillCircle(posX, posY, 16.5f * scale, switchOnColor, red)
 
             // border lines
-            renderer.drawCircleUnsafe(posX, posY, 44f, 6f * scale, black)
-            renderer.drawCircleUnsafe(posX, posY, 33f, 6f * scale, black)
+            renderer.drawCircleUnsafe(posX, posY, 22f, 6f * scale, black)
+            renderer.drawCircleUnsafe(posX, posY, 16.5f, 6f * scale, black)
         }
     },
     light {
@@ -64,18 +64,18 @@ enum class NodeType {
         override fun render(renderer: Renderer, posX: Float, posY: Float, scale: Float, power: Boolean) {
             if (power) {
                 // glow
-                renderer.fillCircle(posX, posY, 150f * scale, lightOnMainColor, lightFieldFadeColor)
+                renderer.fillCircle(posX, posY, 75f * scale, lightOnMainColor, lightFieldFadeColor)
                 // main indicator circle
-                renderer.fillCircle(posX, posY, 44f * scale, white, lightOnMainColor)
+                renderer.fillCircle(posX, posY, 22f * scale, white, lightOnMainColor)
             } else {
                 // main indicator circle
-                renderer.fillCircle(posX, posY, 44f * scale, lightOffMainColor)
+                renderer.fillCircle(posX, posY, 22f * scale, lightOffMainColor)
             }
             // main structure
-            renderer.fillCircle(posX, posY, 22f * scale, nodeStructureColor)
+            renderer.fillCircle(posX, posY, 11f * scale, nodeStructureColor)
             // seperator lines
-            renderer.drawCircleUnsafe(posX, posY, 44f * scale, 6f * scale, black)
             renderer.drawCircleUnsafe(posX, posY, 22f * scale, 6f * scale, black)
+            renderer.drawCircleUnsafe(posX, posY, 11f * scale, 6f * scale, black)
         }
     };
 

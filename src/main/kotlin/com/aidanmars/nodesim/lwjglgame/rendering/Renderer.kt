@@ -1,6 +1,8 @@
 package com.aidanmars.nodesim.lwjglgame.rendering
 
 import com.aidanmars.nodesim.lwjglgame.data.Point
+import com.aidanmars.nodesim.lwjglgame.data.VertexArrayObject
+import com.aidanmars.nodesim.lwjglgame.data.VertexBufferObject
 import com.aidanmars.nodesim.lwjglgame.math.Vector2f
 import org.lwjgl.opengl.GL32.*
 import org.lwjgl.system.MemoryUtil

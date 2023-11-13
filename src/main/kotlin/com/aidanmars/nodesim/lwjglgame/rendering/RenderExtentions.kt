@@ -72,6 +72,25 @@ fun Renderer.drawCircleUnsafe(
     drawPoints(*points)
 }
 
+fun Renderer.drawCircle(
+    centerX: Float, centerY: Float,
+    radius: Float, width: Float,
+    innerColor: Color, outerColor: Color, numSegments: Int = 36
+) {
+    val circleLineWidth = width * 0.5f
+    val innerDistance = radius - circleLineWidth
+    val outerDistance = radius + circleLineWidth
+    val radiansPerSegment = (2f * PI / numSegments).toFloat()
+    val points = Array(numSegments + 2) {
+        val totalRadians = radiansPerSegment * it
+        val thisDistance = if (it and 1 == 1) innerDistance else outerDistance
+        val x = thisDistance * cos(totalRadians) + centerX
+        val y = thisDistance * sin(totalRadians) + centerY
+        Point(x, y, if (it and 1 == 1) innerColor else outerColor)
+    }
+    draw(GL_TRIANGLE_STRIP) { drawPoints(*points) }
+}
+
 fun Renderer.drawLine(
     p1: Point, p2: Point, width: Float, cap: Boolean
 ) {
