@@ -2,7 +2,7 @@ package com.aidanmars.nodesim.lwjglgame.rendering
 
 import com.aidanmars.nodesim.lwjglgame.math.*
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL20
+import org.lwjgl.opengl.GL33
 import org.lwjgl.opengl.GL30
 import org.lwjgl.system.MemoryStack
 
@@ -21,7 +21,7 @@ class ShaderProgram {
      * Creates a shader program.
      */
     init {
-        id = GL20.glCreateProgram()
+        id = GL33.glCreateProgram()
     }
 
     /**
@@ -30,7 +30,7 @@ class ShaderProgram {
      * @param shader Shader to get attached
      */
     fun attachShader(shader: Shader) {
-        GL20.glAttachShader(id, shader.handle)
+        GL33.glAttachShader(id, shader.handle)
     }
 
     /**
@@ -47,7 +47,7 @@ class ShaderProgram {
      * Link this program and check it's status afterwards.
      */
     fun link() {
-        GL20.glLinkProgram(id)
+        GL33.glLinkProgram(id)
         checkStatus()
     }
 
@@ -59,7 +59,7 @@ class ShaderProgram {
      * @return Location of the attribute
      */
     fun getAttributeLocation(name: CharSequence): Int {
-        return GL20.glGetAttribLocation(id, name)
+        return GL33.glGetAttribLocation(id, name)
     }
 
     /**
@@ -68,7 +68,7 @@ class ShaderProgram {
      * @param location Location of the vertex attribute
      */
     fun enableVertexAttribute(location: Int) {
-        GL20.glEnableVertexAttribArray(location)
+        GL33.glEnableVertexAttribArray(location)
     }
 
     /**
@@ -77,7 +77,7 @@ class ShaderProgram {
      * @param location Location of the vertex attribute
      */
     fun disableVertexAttribute(location: Int) {
-        GL20.glDisableVertexAttribArray(location)
+        GL33.glDisableVertexAttribArray(location)
     }
 
     /**
@@ -91,7 +91,7 @@ class ShaderProgram {
      * attribute in bytes
      */
     fun pointVertexAttribute(location: Int, size: Int, stride: Int, offset: Int) {
-        GL20.glVertexAttribPointer(location, size, GL11.GL_FLOAT, false, stride, offset.toLong())
+        GL33.glVertexAttribPointer(location, size, GL11.GL_FLOAT, false, stride, offset.toLong())
     }
 
     /**
@@ -102,7 +102,7 @@ class ShaderProgram {
      * @return Location of the uniform
      */
     fun getUniformLocation(name: CharSequence): Int {
-        return GL20.glGetUniformLocation(id, name)
+        return GL33.glGetUniformLocation(id, name)
     }
 
     /**
@@ -112,7 +112,7 @@ class ShaderProgram {
      * @param value    Value to set
      */
     fun setUniform(location: Int, value: Int) {
-        GL20.glUniform1i(location, value)
+        GL33.glUniform1i(location, value)
     }
 
     /**
@@ -125,7 +125,7 @@ class ShaderProgram {
         MemoryStack.stackPush().use { stack ->
             val buffer = stack.mallocFloat(2)
             value.toBuffer(buffer)
-            GL20.glUniform2fv(location, buffer)
+            GL33.glUniform2fv(location, buffer)
         }
     }
 
@@ -139,7 +139,7 @@ class ShaderProgram {
         MemoryStack.stackPush().use { stack ->
             val buffer = stack.mallocFloat(3)
             value.toBuffer(buffer)
-            GL20.glUniform3fv(location, buffer)
+            GL33.glUniform3fv(location, buffer)
         }
     }
 
@@ -153,7 +153,7 @@ class ShaderProgram {
         MemoryStack.stackPush().use { stack ->
             val buffer = stack.mallocFloat(4)
             value.toBuffer(buffer)
-            GL20.glUniform4fv(location, buffer)
+            GL33.glUniform4fv(location, buffer)
         }
     }
 
@@ -167,7 +167,7 @@ class ShaderProgram {
         MemoryStack.stackPush().use { stack ->
             val buffer = stack.mallocFloat(2 * 2)
             value.toBuffer(buffer)
-            GL20.glUniformMatrix2fv(location, false, buffer)
+            GL33.glUniformMatrix2fv(location, false, buffer)
         }
     }
 
@@ -181,7 +181,7 @@ class ShaderProgram {
         MemoryStack.stackPush().use { stack ->
             val buffer = stack.mallocFloat(3 * 3)
             value.toBuffer(buffer)
-            GL20.glUniformMatrix3fv(location, false, buffer)
+            GL33.glUniformMatrix3fv(location, false, buffer)
         }
     }
 
@@ -195,7 +195,7 @@ class ShaderProgram {
         MemoryStack.stackPush().use { stack ->
             val buffer = stack.mallocFloat(4 * 4)
             value.toBuffer(buffer)
-            GL20.glUniformMatrix4fv(location, false, buffer)
+            GL33.glUniformMatrix4fv(location, false, buffer)
         }
     }
 
@@ -203,16 +203,16 @@ class ShaderProgram {
      * Use this shader program.
      */
     fun use() {
-        GL20.glUseProgram(id)
+        GL33.glUseProgram(id)
     }
 
     /**
      * Checks if the program was linked successfully.
      */
     fun checkStatus() {
-        val status = GL20.glGetProgrami(id, GL20.GL_LINK_STATUS)
+        val status = GL33.glGetProgrami(id, GL33.GL_LINK_STATUS)
         if (status != GL11.GL_TRUE) {
-            throw RuntimeException(GL20.glGetProgramInfoLog(id))
+            throw RuntimeException(GL33.glGetProgramInfoLog(id))
         }
     }
 
@@ -220,6 +220,6 @@ class ShaderProgram {
      * Deletes the shader program.
      */
     fun delete() {
-        GL20.glDeleteProgram(id)
+        GL33.glDeleteProgram(id)
     }
 }

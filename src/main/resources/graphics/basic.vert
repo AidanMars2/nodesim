@@ -1,12 +1,13 @@
 #version 330 core
 
-in vec2 position;
-in vec4 vertexColor;
+layout (location = 0) in vec2 position;
+layout (location = 1) in vec4 vertexColor;
 out vec4 color;
 
 uniform vec2 scale;
 
 void main() {
-    gl_Position = vec4(position * scale, 0.0f, 1.0f);
+    vec2 scaledLocation = position * scale;
+    gl_Position = vec4(scaledLocation, 0.0f, 1.0f);
     color = vertexColor;
 }

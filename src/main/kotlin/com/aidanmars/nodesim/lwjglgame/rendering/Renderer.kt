@@ -64,9 +64,8 @@ class Renderer {
     private fun flush(drawType: Int = GL_TRIANGLES) {
         if (numVertices <= 0) return
         vertices.flip()
+        program.use()
         vao.bind()
-//        program.use()
-        // we only use one shader so this is not necessary(i hope)
 
         /* Upload the new vertex data */vbo.bind(GL_ARRAY_BUFFER)
         vbo.uploadSubData(GL_ARRAY_BUFFER, 0, vertices)
@@ -105,7 +104,7 @@ class Renderer {
         vbo.uploadData(GL_ARRAY_BUFFER, size, GL_DYNAMIC_DRAW)
 
         val vertexShader = Shader.loadShader(GL_VERTEX_SHADER, "graphics/basic.vert")
-        val fragShader = Shader.loadShader(GL_VERTEX_SHADER, "graphics/basic.frag")
+        val fragShader = Shader.loadShader(GL_FRAGMENT_SHADER, "graphics/basic.frag")
 
         program = ShaderProgram()
         program.attachShader(vertexShader)
@@ -122,16 +121,17 @@ class Renderer {
     }
 
     private fun specifyVertexAttributes() {
-        val posAttrib = program.getAttributeLocation("position")
-        program.enableVertexAttribute(posAttrib)
-        program.pointVertexAttribute(posAttrib, 2, 6 * Float.SIZE_BYTES, 0)
+        //val posAttrib = program.getAttributeLocation("position")
+        program.enableVertexAttribute(0)// location attribute
+        program.pointVertexAttribute(0, 2, 6 * Float.SIZE_BYTES, 0)
 
-        val colAttrib = program.getAttributeLocation("vertexColor")
-        program.enableVertexAttribute(colAttrib)
-        program.pointVertexAttribute(colAttrib, 4, 6 * Float.SIZE_BYTES, 2 * Float.SIZE_BYTES)
+        //val colAttrib = program.getAttributeLocation("vertexColor")
+        program.enableVertexAttribute(1)// color attribute
+        program.pointVertexAttribute(1, 4, 6 * Float.SIZE_BYTES, 2 * Float.SIZE_BYTES)
     }
 
     private fun setShaderScale() {
+        program.use()
         program.setUniform(scaleAttributePosition, Vector2f(xScale, yScale))
     }
 

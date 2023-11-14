@@ -20,8 +20,8 @@ class GameData {
     var currentPlaceType = NodeType.switch
     var selectionLocation1 = WorldLocation(0, 0)
     var selectionLocation2 = WorldLocation(0, 0)
-    var width = 640
-    var height = 480
+    var width = glfwGetVideoMode(glfwGetPrimaryMonitor())?.width() ?: 640
+    var height = glfwGetVideoMode(glfwGetPrimaryMonitor())?.height() ?: 480
     private val wasdKeysPressed = BooleanArray(4) // w, a, s, d
     val hudElements = mutableListOf<HUDElement>()
 
@@ -45,8 +45,9 @@ class GameData {
     }
 
     fun handleInput(inputQueue: LinkedBlockingQueue<Input>) {
-        inputQueue.forEach {
-            if (!it.mouseInScreen) return@forEach
+        while (inputQueue.isNotEmpty()) {
+            val it = inputQueue.poll()
+            if (!it.mouseInScreen) continue
             when (it.type) {
                 Input.Type.keyPress -> handleKeyPress(it)
                 Input.Type.keyRelease -> handleKeyRelease(it)

@@ -7,6 +7,7 @@ import com.aidanmars.nodesim.lwjglgame.rendering.Renderer
 import com.aidanmars.nodesim.lwjglgame.rendering.Window
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.opengl.GL33
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -23,8 +24,9 @@ object Game {
     private val timer = Timer()
     private val gameRenderer = GameRenderer(renderer, state)
 
-    private fun runGraphics() {
+    fun run() {
         init()
+        runSimulation()
         gameLoop()
         dispose()
     }
@@ -32,6 +34,7 @@ object Game {
     private fun runSimulation() {
         // do simulation async
         Thread {
+            running = true
             while (running) {
                 state.tick(window.toRenderScreenLocation(window.getMouseLocation()))
                 state.handleInput(inputQueue)
@@ -41,13 +44,9 @@ object Game {
         }.start()
     }
 
-    fun run() {
-        runSimulation()
-        runGraphics()
-    }
-
     fun end() {
         window.isClosing = true
+        running = false
     }
 
     private fun init() {
@@ -83,6 +82,7 @@ object Game {
     }
 
     private fun render() {
+        GL33.glClear(GL33.GL_COLOR_BUFFER_BIT or GL33.GL_DEPTH_BUFFER_BIT)
         gameRenderer.render(windowWidth, windowHeight)
     }
 

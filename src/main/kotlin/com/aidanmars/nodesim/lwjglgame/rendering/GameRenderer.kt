@@ -32,7 +32,7 @@ class GameRenderer(
     fun render(windowWidth: Int, windowHeight: Int) {
         val halfWidth = (windowWidth shr 1).toFloat()
         val halfHeight = (windowHeight shr 1).toFloat()
-        renderer.setScale(1 / halfWidth, 1 / halfHeight)
+        renderer.setScale(1f / halfWidth, 1f / halfHeight)
         drawBackGround(
             state.scale,
             halfWidth, halfHeight
