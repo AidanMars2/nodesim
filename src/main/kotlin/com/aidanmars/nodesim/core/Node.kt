@@ -10,11 +10,13 @@ data class Node(
     var inputPower: Int = inputNodes.count { it.outputPower },
     var outputPower: Boolean = type.update(inputNodes.size, inputPower)
 ) {
+    var inputPowerBuffer = inputPower
     /**
      * @param propagate if this function should update the nodes that depend on this node
      * @return the nodes to be updated next
      */
     fun update(propagate: Boolean = true): Set<Node> {
+        inputPower = inputPowerBuffer
         val oldPower = outputPower
         outputPower = type.update(inputNodes.size, inputPower)
         if (!propagate) return emptySet()
@@ -23,7 +25,7 @@ data class Node(
             !oldPower -> 1
             else -> -1
         }
-        outputNodes.forEach { it.inputPower += powerOffset }
+        outputNodes.forEach { it.inputPowerBuffer += powerOffset }
 
         return outputNodes
     }

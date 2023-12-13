@@ -7,7 +7,7 @@ fun Circuit.verify() {
         node.inputNodes.removeAll { it.id !in nodes }
         node.outputNodes.removeAll { it.id !in nodes }
         val oldInputPower = node.inputPower
-        node.inputPower = node.inputNodes.count { it.outputPower }
+        node.inputPowerBuffer = node.inputNodes.count { it.outputPower }
         if (node.inputPower != oldInputPower) updates.add(node)
     }
 }

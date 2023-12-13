@@ -20,7 +20,7 @@ class Circuit(
         node.outputNodes.forEach { it.inputNodes.remove(node) }
         if (node.outputPower) {
             node.outputNodes.forEach {
-                it.inputPower--
+                it.inputPowerBuffer--
             }
         }
         if (update) updates.addAll(node.outputNodes) // and gate logic
@@ -32,7 +32,7 @@ class Circuit(
         if (from !in to.inputNodes || to !in from.outputNodes) return false
         from.outputNodes.remove(to)
         to.inputNodes.remove(from)
-        if (from.outputPower) to.inputPower--
+        if (from.outputPower) to.inputPowerBuffer--
         if (update) updates.add(to) // and gate logic
         return true
     }
@@ -41,7 +41,7 @@ class Circuit(
         if (from in to.inputNodes || to in from.outputNodes) return false
         from.outputNodes.add(to)
         to.inputNodes.add(from)
-        if (from.outputPower) to.inputPower++
+        if (from.outputPower) to.inputPowerBuffer++
         if (update) updates.add(to) // and gate logic
         return true
     }
