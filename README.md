@@ -1,2 +1,2 @@
 # nodesim
-hmm yes readme
+this project is the core for all node simulation projects
