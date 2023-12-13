@@ -1,9 +1,9 @@
 package com.aidanmars.nodesim.core
 
 class Circuit(
-    val nodes: MutableMap<Int, Node>,
-    var updates: MutableSet<Node>,
-    val chunks: ChunkMap,
+    val nodes: MutableMap<Int, Node> = mutableMapOf(),
+    var updates: MutableSet<Node> = mutableSetOf(),
+    val chunks: ChunkMap = ChunkMap(),
     private var nextNodeId: Int = 0
 ) {
     fun createNode(x: Int, y: Int, type: NodeType): Node {
