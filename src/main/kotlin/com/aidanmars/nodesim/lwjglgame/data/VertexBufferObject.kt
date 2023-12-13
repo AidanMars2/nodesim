@@ -1,6 +1,7 @@
 package com.aidanmars.nodesim.lwjglgame.data
 
 import org.lwjgl.opengl.GL15
+import org.lwjgl.opengl.GL33
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
@@ -27,7 +28,7 @@ class VertexBufferObject {
      * @param target Target to bind
      */
     fun bind(target: Int) {
-        GL15.glBindBuffer(target, id)
+        GL33.glBindBuffer(target, id)
     }
 
     /**

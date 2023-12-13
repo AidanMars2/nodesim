@@ -18,7 +18,6 @@ class Renderer {
     private var numVertices = 0
     private var xScale = 1f
     private var yScale = 1f
-    private var scaleAttributePosition by Delegates.notNull<Int>()
 
     fun dispose() {
         MemoryUtil.memFree(vertices)
@@ -91,6 +90,19 @@ class Renderer {
     }
 
     private fun setupShaderProgram() {
+        val vertexShader = Shader.loadShader(GL_VERTEX_SHADER, "graphics/basic.vert")
+        val fragShader = Shader.loadShader(GL_FRAGMENT_SHADER, "graphics/basic.frag")
+
+        program = ShaderProgram()
+        program.attachShader(vertexShader)
+        program.attachShader(fragShader)
+        program.bindFragmentDataLocation(0, "FragColor")
+        program.link()
+        program.use()
+
+        /* Delete linked shaders */vertexShader.delete()
+        fragShader.delete()
+
         vao = VertexArrayObject()
         vao.bind()
 
@@ -103,24 +115,11 @@ class Renderer {
         val size: Long = (vertices.capacity() * java.lang.Float.BYTES).toLong()
         vbo.uploadData(GL_ARRAY_BUFFER, size, GL_DYNAMIC_DRAW)
 
-        val vertexShader = Shader.loadShader(GL_VERTEX_SHADER, "graphics/basic.vert")
-        val fragShader = Shader.loadShader(GL_FRAGMENT_SHADER, "graphics/basic.frag")
-
-        program = ShaderProgram()
-        program.attachShader(vertexShader)
-        program.attachShader(fragShader)
-        program.bindFragmentDataLocation(0, "FragColor")
-        scaleAttributePosition = program.getAttributeLocation("scale")
-        program.link()
-        program.use()
-
-        /* Delete linked shaders */vertexShader.delete()
-        fragShader.delete()
-
         /* Specify Vertex Pointers */specifyVertexAttributes()
     }
 
     private fun specifyVertexAttributes() {
+        program.setUniform(program.getUniformLocation("scale"), Vector2f(1f/640, 1f/480))
         //val posAttrib = program.getAttributeLocation("position")
         program.enableVertexAttribute(0)// location attribute
         program.pointVertexAttribute(0, 2, 6 * Float.SIZE_BYTES, 0)
@@ -132,7 +131,7 @@ class Renderer {
 
     private fun setShaderScale() {
         program.use()
-        program.setUniform(scaleAttributePosition, Vector2f(xScale, yScale))
+        program.setUniform(program.getAttributeLocation("scale"), Vector2f(xScale, yScale))
     }
 
     fun setScale(x: Float, y: Float) {

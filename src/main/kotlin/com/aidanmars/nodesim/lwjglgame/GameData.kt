@@ -20,8 +20,8 @@ class GameData {
     var currentPlaceType = NodeType.switch
     var selectionLocation1 = WorldLocation(0, 0)
     var selectionLocation2 = WorldLocation(0, 0)
-    var width = glfwGetVideoMode(glfwGetPrimaryMonitor())?.width() ?: 640
-    var height = glfwGetVideoMode(glfwGetPrimaryMonitor())?.height() ?: 480
+    var width = 640
+    var height = 480
     private val wasdKeysPressed = BooleanArray(4) // w, a, s, d
     val hudElements = mutableListOf<HUDElement>()
 

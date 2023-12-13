@@ -156,11 +156,6 @@ class Window(
     }
 
     var isClosing: Boolean
-        /**
-         * Returns if the window is closing.
-         *
-         * @return true if the window should close, else false
-         */
         get() = GLFW.glfwWindowShouldClose(handle)
         set(value) = GLFW.glfwSetWindowShouldClose(handle, value)
 

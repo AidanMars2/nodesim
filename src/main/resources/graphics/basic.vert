@@ -8,6 +8,6 @@ uniform vec2 scale;
 
 void main() {
     vec2 scaledLocation = position * scale;
-    gl_Position = vec4(scaledLocation, 0.0f, 1.0f);
+    gl_Position = vec4(scaledLocation.x, scaledLocation.y, 1.0f, 1.0f);
     color = vertexColor;
 }

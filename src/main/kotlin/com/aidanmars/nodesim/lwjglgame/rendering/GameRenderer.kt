@@ -10,6 +10,7 @@ import com.aidanmars.nodesim.lwjglgame.angleBetweenPoints
 import com.aidanmars.nodesim.lwjglgame.data.Color
 import com.aidanmars.nodesim.lwjglgame.data.Location
 import com.aidanmars.nodesim.lwjglgame.data.Point
+import org.lwjgl.opengl.GL33
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -32,6 +33,12 @@ class GameRenderer(
     fun render(windowWidth: Int, windowHeight: Int) {
         val halfWidth = (windowWidth shr 1).toFloat()
         val halfHeight = (windowHeight shr 1).toFloat()
+//        renderer.setScale(1f, 1f)
+//        renderer.draw { renderer.drawPoints(
+//            Point(-0.5f, -0.5f, Color(1f, 0f, 0f)),
+//            Point(0.5f, -0.5f, Color(0f, 1f, 0f)),
+//            Point(0f, 0.5f, Color(0f, 0f, 1f))
+//        ) }// draw failed
         renderer.setScale(1f / halfWidth, 1f / halfHeight)
         drawBackGround(
             state.scale,

@@ -84,7 +84,7 @@ class Shader(type: Int) {
         fun loadShader(type: Int, path: String): Shader {
             val builder = StringBuilder()
             try {
-                resourceInputStreamOf(path).use { `in` ->
+                resourceInputStreamOf(path)!!.use { `in` ->
                     BufferedReader(InputStreamReader(`in`)).use { reader ->
                         var line: String?
                         while (reader.readLine().also { line = it } != null) {

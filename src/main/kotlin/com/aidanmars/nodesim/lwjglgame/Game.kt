@@ -22,7 +22,7 @@ object Game {
     private var windowWidth = 640
     private var windowHeight = 480
     private val timer = Timer()
-    private val gameRenderer = GameRenderer(renderer, state)
+    private lateinit var gameRenderer: GameRenderer
 
     fun run() {
         init()
@@ -55,10 +55,11 @@ object Game {
 
         check(GLFW.glfwInit()) { "Unable to initialize GLFW" }
 
-        window = Window(640, 480, "NodeSim", true, inputQueue, ::setWindowSize)
-        windowWidth = 640
-        windowHeight = 480
+        windowWidth = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor())?.width() ?: 640
+        windowHeight = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor())?.height() ?: 480
+        window = Window(windowWidth, windowHeight, "NodeSim", true, inputQueue, ::setWindowSize)
 
+        gameRenderer = GameRenderer(renderer, state)
         renderer.init()
         gameRenderer.init()
 
