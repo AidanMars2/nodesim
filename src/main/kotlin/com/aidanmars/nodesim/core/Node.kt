@@ -41,4 +41,24 @@ data class Node(
         if (outputPower != power) return false to updateResults
         return true to updateResults
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Node
+
+        if (id != other.id) return false
+        if (type != other.type) return false
+        if (x != other.x) return false
+        if (y != other.y) return false
+        if (outputPower != other.outputPower) return false
+        if (inputPowerBuffer != other.inputPowerBuffer) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id
+    }
 }
