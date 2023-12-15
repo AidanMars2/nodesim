@@ -25,7 +25,8 @@ class Circuit(
         }
         if (update) updates.addAll(node.outputNodes) // and gate logic
         nodes.remove(node.id)
-        chunks[node.x, node.y]?.remove(node)
+        val chunk = getChunk(node.x, node.y)
+        chunks[chunk]?.remove(node)
     }
 
     fun disconnectNodes(from: Node, to: Node, update: Boolean = true): Boolean {
