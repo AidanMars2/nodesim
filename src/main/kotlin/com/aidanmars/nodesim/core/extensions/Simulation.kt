@@ -8,6 +8,7 @@ fun Circuit.tick(amount: UInt) {
     for (index in 0u..<amount){
         val thisTickUpdates = updates
         updates = mutableSetOf()
-        thisTickUpdates.forEach { updateNode(it) }
+        thisTickUpdates.forEach { it.preUpdate() }
+        thisTickUpdates.forEach { updateNode(it, preUpdate = false) }
     }
 }

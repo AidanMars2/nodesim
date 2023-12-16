@@ -54,8 +54,9 @@ class Circuit(
         chunks.getOrPut(newX to newY) { mutableSetOf() }.add(node)
     }
 
-    fun updateNode(node: Node, update: Boolean = true) {
-        updates.addAll(node.update(update))
+    fun updateNode(node: Node, propagate: Boolean = true, preUpdate: Boolean = true) {
+        if (preUpdate) node.preUpdate()
+        updates.addAll(node.update(propagate))
     }
 
     fun triggerNode(node: Node, update: Boolean = true): Boolean {
